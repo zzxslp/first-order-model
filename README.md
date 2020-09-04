@@ -8,11 +8,6 @@ The videos on the left show the driving videos. The first row on the right for e
 
 ### VoxCeleb Dataset
 ![Screenshot](sup-mat/vox-teaser.gif)
-### Fashion Dataset
-![Screenshot](sup-mat/fashion-teaser.gif)
-### MGIF Dataset
-![Screenshot](sup-mat/mgif-teaser.gif)
-
 
 ### Installation and Usage
 1. Create a virtual environment with dependecies. 
@@ -42,7 +37,8 @@ pip install -r requirements.txt
 ```
 
 2. Prepare data
-We have prepared a sample video and an image under ```mydata```. If you would like to generate videos and images on your own, refer to the ```Crop videos and images``` session below. Generally, the extact size of 256x256 for videos and images are not required, but you should use sources with similar scales and make sure the human face is in the middle of your video/image.
+
+We have prepared a sample video and an image under the folder ```mydata```. If you would like to crop videos and images on your own, refer to the ```Crop videos and images``` session below. Generally, the extact size of 256x256 for videos and images are not required, but you should use sources with similar scales and make sure the human face is in the middle of your video/image.
 
 To run the demo, you also need to download a checkpoint of the model.
 Checkpoints can be found under following link: [google-drive](https://drive.google.com/open?id=1PyQJmkdCsAkOYwUyaj_l-l0as-iLDgeH) or [yandex-disk](https://yadi.sk/d/lEw8uRm140L_eQ).
@@ -51,6 +47,7 @@ Select ```vox-adv-cpk.pth.tar```, download it and put under the ```mydata``` dir
 
 
 3.  Animation Demo
+
 To run the demo and generate a video, run the following command:
 ```
 python demo.py --relative --adapt_scale  --config config/dataset_name.yaml --driving_video path/to/driving --source_image path/to/source --checkpoint path/to/checkpoint --result_video path/to/output --cpu
@@ -59,9 +56,11 @@ The result will be stored in ```output/result.mp4```.
 
 Example command in our case: (In our example, we put the video, image and the checkpoint all under folder ```mydata```)
 ```
-python demo.py  --relative --adapt_scale --config config/vox-adv-256.yaml --driving_video mydata/unravel.mp4 --source_image mydata/girl.png --checkpoint mydata/vox-adv-cpk.pth.tar --result_video output/girl.mp4  --cpu
+python demo.py  --relative --adapt_scale --config config/vox-adv-256.yaml --driving_video mydata/unravel.mp4 --source_image mydata/girl.png --checkpoint mydata/vox-adv-cpk.pth.tar --result_video output/result.mp4  --cpu
 ```
 If you have GPU on your computer, delete the ```--cpu``` flag.
+
+You shoule obtain an animated video ```result.mp4``` under ```output```.
 
 ### Crop videos and images
 
@@ -76,43 +75,6 @@ python setup.py install
 We also provide a piece of code for resize images in python.
 
 TODO: fix bug in crop-video.py and improve crop-img.py
-
-
-### YAML configs
-
-There are several configuration (```config/dataset_name.yaml```) files one for each `dataset`. See ```config/vox-adv-256.yaml``` to get description of each parameter.
-
-
-### Animation demo with Docker
-
-If you are having trouble getting the demo to work because of library compatibility issues,
-and you're running Linux, you might try running it inside a Docker container, which would
-give you better control over the execution environment.
-
-Requirements: Docker 19.03+ and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
-installed and able to successfully run the `nvidia-docker` usage tests.
-
-We'll first build the container.
-
-```
-docker build -t first-order-model .
-```
-
-And now that we have the container available locally, we can use it to run the demo.
-
-```
-docker run -it --rm --gpus all \
-       -v $HOME/first-order-model:/app first-order-model \
-       python3 demo.py --config config/vox-256.yaml \
-           --driving_video driving.mp4 \
-           --source_image source.png  \ 
-           --checkpoint vox-cpk.pth.tar \ 
-           --result_video result.mp4 \
-           --relative --adapt_scale
-```
-
-### Colab Demo 
-We prepare a special demo for the google-colab, see: ```demo-colab.ipynb```.
 
 ### Face-swap
 It is possible to modify the method to perform face-swap using supervised segmentation masks.
