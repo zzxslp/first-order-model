@@ -50,7 +50,7 @@ Select ```vox-adv-cpk.pth.tar```, download it and put under the ```mydata``` dir
 
 To run the demo and generate a video, run the following command:
 ```
-python demo.py --relative --adapt_scale  --config config/dataset_name.yaml --driving_video path/to/driving --source_image path/to/source --checkpoint path/to/checkpoint --result_video path/to/output --cpu
+python demo.py --relative --adapt_scale --config config/dataset_name.yaml --driving_video path/to/driving --source_image path/to/source --checkpoint path/to/checkpoint --result_video path/to/output --cpu
 ```
 The result will be stored in ```output/result.mp4```.
 
@@ -64,7 +64,7 @@ You shoule obtain an animated video ```result.mp4``` under ```output```.
 
 ### Crop videos and images
 
-The driving videos and source images should be cropped before it can be used in our method. To obtain some semi-automatic crop suggestions you can use ```python crop-video.py --inp some_youtube_video.mp4```. It will generate commands for crops using ffmpeg. In order to use the script, face-alligment library is needed:
+The driving videos and source images should be cropped (or at least the human-face/object is in the middle of your image) before it can be used in our method. To obtain some semi-automatic crop suggestions you can use ```python crop-video.py --inp some_youtube_video.mp4```. It will generate commands for crops using ffmpeg. In order to use the script, face-alligment library is needed:
 ```
 git clone https://github.com/1adrianb/face-alignment
 cd face-alignment
