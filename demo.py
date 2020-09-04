@@ -11,6 +11,7 @@ from skimage.transform import resize
 from skimage import img_as_ubyte
 import torch
 from sync_batchnorm import DataParallelWithCallback
+import moviepy.editor as mpe
 
 from modules.generator import OcclusionAwareGenerator
 from modules.keypoint_detector import KPDetector
@@ -109,7 +110,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--source_image", default='sup-mat/source.png', help="path to source image")
     parser.add_argument("--driving_video", default='sup-mat/source.png', help="path to driving video")
-    parser.add_argument("--result_video", default='result.mp4', help="path to output")
+    parser.add_argument("--result_video", default='output/result.mp4', help="path to output")
  
     parser.add_argument("--relative", dest="relative", action="store_true", help="use relative or absolute keypoint coordinates")
     parser.add_argument("--adapt_scale", dest="adapt_scale", action="store_true", help="adapt movement scale based on convex hull of keypoints")
@@ -128,30 +129,37 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
-    source_image = imageio.imread(opt.source_image)
-    reader = imageio.get_reader(opt.driving_video)
-    fps = reader.get_meta_data()['fps']
-    driving_video = []
-    try:
-        for im in reader:
-            driving_video.append(im)
-    except RuntimeError:
-        pass
-    reader.close()
+    # source_image = imageio.imread(opt.source_image)
+    # reader = imageio.get_reader(opt.driving_video)
+    # fps = reader.get_meta_data()['fps']
+    # driving_video = []
+    # try:
+    #     for im in reader:
+    #         driving_video.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
 
-    source_image = resize(source_image, (256, 256))[..., :3]
-    driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
-    generator, kp_detector = load_checkpoints(config_path=opt.config, checkpoint_path=opt.checkpoint, cpu=opt.cpu)
+    # source_image = resize(source_image, (256, 256))[..., :3]
+    # driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
+    # generator, kp_detector = load_checkpoints(config_path=opt.config, checkpoint_path=opt.checkpoint, cpu=opt.cpu)
 
-    if opt.find_best_frame or opt.best_frame is not None:
-        i = opt.best_frame if opt.best_frame is not None else find_best_frame(source_image, driving_video, cpu=opt.cpu)
-        print ("Best frame: " + str(i))
-        driving_forward = driving_video[i:]
-        driving_backward = driving_video[:(i+1)][::-1]
-        predictions_forward = make_animation(source_image, driving_forward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-        predictions_backward = make_animation(source_image, driving_backward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-        predictions = predictions_backward[::-1] + predictions_forward[1:]
-    else:
-        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-    imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+    # if opt.find_best_frame or opt.best_frame is not None:
+    #     i = opt.best_frame if opt.best_frame is not None else find_best_frame(source_image, driving_video, cpu=opt.cpu)
+    #     print ("Best frame: " + str(i))
+    #     driving_forward = driving_video[i:]
+    #     driving_backward = driving_video[:(i+1)][::-1]
+    #     predictions_forward = make_animation(source_image, driving_forward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+    #     predictions_backward = make_animation(source_image, driving_backward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+    #     predictions = predictions_backward[::-1] + predictions_forward[1:]
+    # else:
+    #     predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+    # imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+
+    ## add audio
+    my_clip = mpe.VideoFileClip(opt.result_video)
+    audio_background = mpe.VideoFileClip(opt.driving_video)
+    final_clip = my_clip.set_audio(audio_background.audio)
+    os.remove(opt.result_video) ## delete old video before write new one
+    final_clip.write_videofile(opt.result_video, audio=True)
 
