@@ -129,32 +129,32 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
-    # source_image = imageio.imread(opt.source_image)
-    # reader = imageio.get_reader(opt.driving_video)
-    # fps = reader.get_meta_data()['fps']
-    # driving_video = []
-    # try:
-    #     for im in reader:
-    #         driving_video.append(im)
-    # except RuntimeError:
-    #     pass
-    # reader.close()
+    source_image = imageio.imread(opt.source_image)
+    reader = imageio.get_reader(opt.driving_video)
+    fps = reader.get_meta_data()['fps']
+    driving_video = []
+    try:
+        for im in reader:
+            driving_video.append(im)
+    except RuntimeError:
+        pass
+    reader.close()
 
-    # source_image = resize(source_image, (256, 256))[..., :3]
-    # driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
-    # generator, kp_detector = load_checkpoints(config_path=opt.config, checkpoint_path=opt.checkpoint, cpu=opt.cpu)
+    source_image = resize(source_image, (256, 256))[..., :3]
+    driving_video = [resize(frame, (256, 256))[..., :3] for frame in driving_video]
+    generator, kp_detector = load_checkpoints(config_path=opt.config, checkpoint_path=opt.checkpoint, cpu=opt.cpu)
 
-    # if opt.find_best_frame or opt.best_frame is not None:
-    #     i = opt.best_frame if opt.best_frame is not None else find_best_frame(source_image, driving_video, cpu=opt.cpu)
-    #     print ("Best frame: " + str(i))
-    #     driving_forward = driving_video[i:]
-    #     driving_backward = driving_video[:(i+1)][::-1]
-    #     predictions_forward = make_animation(source_image, driving_forward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-    #     predictions_backward = make_animation(source_image, driving_backward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-    #     predictions = predictions_backward[::-1] + predictions_forward[1:]
-    # else:
-    #     predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
-    # imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
+    if opt.find_best_frame or opt.best_frame is not None:
+        i = opt.best_frame if opt.best_frame is not None else find_best_frame(source_image, driving_video, cpu=opt.cpu)
+        print ("Best frame: " + str(i))
+        driving_forward = driving_video[i:]
+        driving_backward = driving_video[:(i+1)][::-1]
+        predictions_forward = make_animation(source_image, driving_forward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+        predictions_backward = make_animation(source_image, driving_backward, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+        predictions = predictions_backward[::-1] + predictions_forward[1:]
+    else:
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=opt.relative, adapt_movement_scale=opt.adapt_scale, cpu=opt.cpu)
+    imageio.mimsave(opt.result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
 
     ## add audio
     my_clip = mpe.VideoFileClip(opt.result_video)
